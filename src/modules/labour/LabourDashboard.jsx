@@ -1,14 +1,29 @@
 import { useState } from "react";
+import LabourEntryForm from "./LabourEntryForm";
 
 export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site Alpha" }) {
-  const [entries] = useState([]);
+  const [entries, setEntries] = useState([]);
   const [activeNav, setActiveNav] = useState("labour");
+  const [showForm, setShowForm] = useState(false);
+  const [editData, setEditData] = useState(null);
 
   const totalCost = entries.reduce((sum, e) => sum + (e.totalCost || 0), 0);
   const totalHours = entries.reduce((sum, e) => sum + (Number(e.hoursWorked) || 0), 0);
 
   const orange = "#F97316";
   const black = "#1a1a1a";
+
+  const handleSave = (entry) => {
+    if (editData) {
+      setEntries(entries.map((e) => e.id === entry.id ? entry : e));
+    } else {
+      setEntries([...entries, entry]);
+    }
+    setShowForm(false);
+    setEditData(null);
+  };
+
+  const openAdd = () => { setEditData(null); setShowForm(true); };
 
   const navItems = [
     { icon: "🏠", label: "Dashboard", key: "dashboard" },
@@ -26,21 +41,14 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
     <div style={{ display: "flex", height: "100vh", fontFamily: "'Inter', sans-serif", backgroundColor: "#f8fafc" }}>
 
       {/* ── SIDEBAR ── */}
-      <div style={{ width: "235px", backgroundColor: black, display: "flex", flexDirection: "column", flexShrink: 0 }}>
+      <div style={{ width: "235px", backgroundColor: "#1E293B", display: "flex", flexDirection: "column", flexShrink: 0 }}>
 
         {/* Logo + App Name */}
         <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", gap: "12px" }}>
           <img
             src="/logo.jpeg"
             alt="BuildTrack"
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "2px solid #F97316",
-              flexShrink: 0,
-            }}
+            style={{ width: "52px", height: "52px", borderRadius: "50%", objectFit: "cover", border: "2px solid #F97316", flexShrink: 0 }}
           />
           <div>
             <div style={{ fontSize: "16px", fontWeight: 800, lineHeight: 1.2 }}>
@@ -91,17 +99,10 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
         {/* Top Bar */}
         <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #e2e8f0", height: "62px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", flexShrink: 0 }}>
           <span style={{ fontSize: "20px", color: "#64748b", cursor: "pointer" }}>☰</span>
-
-          {/* Search */}
           <div style={{ flex: 1, maxWidth: "380px", margin: "0 24px", position: "relative" }}>
             <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}>🔍</span>
-            <input
-              placeholder="Search anything..."
-              style={{ width: "100%", padding: "9px 12px 9px 36px", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "13px", color: "#374151", outline: "none", backgroundColor: "#f8fafc", boxSizing: "border-box" }}
-            />
+            <input placeholder="Search anything..." style={{ width: "100%", padding: "9px 12px 9px 36px", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "13px", color: "#374151", outline: "none", backgroundColor: "#f8fafc", boxSizing: "border-box" }} />
           </div>
-
-          {/* Right */}
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <div style={{ position: "relative", cursor: "pointer" }}>
               <span style={{ fontSize: "22px" }}>🔔</span>
@@ -127,7 +128,7 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
               <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 700, color: "#111827" }}>Labour Cost Tracking 👷</h1>
               <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#64748b" }}>Manage workers, attendance and labour costs · {siteName}</p>
             </div>
-            <button style={{ backgroundColor: orange, color: "#fff", border: "none", padding: "11px 22px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
+            <button onClick={openAdd} style={{ backgroundColor: orange, color: "#fff", border: "none", padding: "11px 22px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
               + Add Entry
             </button>
           </div>
@@ -153,17 +154,33 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
           </div>
 
           {/* Empty State */}
-          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "320px" }}>
-            <div style={{ fontSize: "52px", marginBottom: "16px" }}>👷</div>
-            <p style={{ margin: "0 0 6px", fontSize: "16px", fontWeight: 700, color: "#111827" }}>No labour entries yet</p>
-            <p style={{ margin: "0 0 24px", fontSize: "13px", color: "#94a3b8" }}>Add your first entry to start tracking costs for this site.</p>
-            <button style={{ backgroundColor: orange, color: "#fff", border: "none", padding: "11px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
-              + Add First Entry
-            </button>
-          </div>
+          {entries.length === 0 ? (
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "320px" }}>
+              <div style={{ fontSize: "52px", marginBottom: "16px" }}>👷</div>
+              <p style={{ margin: "0 0 6px", fontSize: "16px", fontWeight: 700, color: "#111827" }}>No labour entries yet</p>
+              <p style={{ margin: "0 0 24px", fontSize: "13px", color: "#94a3b8" }}>Add your first entry to start tracking costs for this site.</p>
+              <button onClick={openAdd} style={{ backgroundColor: orange, color: "#fff", border: "none", padding: "11px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
+                + Add First Entry
+              </button>
+            </div>
+          ) : (
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "20px" }}>
+              <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>✅ {entries.length} entries added. Table coming in next step!</p>
+            </div>
+          )}
 
         </div>
       </div>
+
+      {/* Form Modal */}
+      {showForm && (
+        <LabourEntryForm
+          onSave={handleSave}
+          onCancel={() => { setShowForm(false); setEditData(null); }}
+          editData={editData}
+        />
+      )}
+
     </div>
   );
 }
