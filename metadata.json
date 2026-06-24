@@ -1,0 +1,6 @@
+{
+  "name": "BuildTrack",
+  "description": "A premium, robust construction expense and finance intelligence tracker with specialized demo views for administrators and clients.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
