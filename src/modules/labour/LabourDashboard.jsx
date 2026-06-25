@@ -1,14 +1,15 @@
 import { useState } from "react";
 import LabourEntryForm from "./LabourEntryForm";
+import LabourTable from "./LabourTable";
+import LabourFilters from "./LabourFilters";
 
 export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site Alpha" }) {
   const [entries, setEntries] = useState([]);
   const [activeNav, setActiveNav] = useState("labour");
   const [showForm, setShowForm] = useState(false);
   const [editData, setEditData] = useState(null);
-
-  const totalCost = entries.reduce((sum, e) => sum + (e.totalCost || 0), 0);
-  const totalHours = entries.reduce((sum, e) => sum + (Number(e.hoursWorked) || 0), 0);
+  const [filterDate, setFilterDate] = useState("");
+  const [filterRole, setFilterRole] = useState("");
 
   const orange = "#F97316";
   const black = "#1a1a1a";
@@ -23,7 +24,27 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
     setEditData(null);
   };
 
+  const handleEdit = (entry) => {
+    setEditData(entry);
+    setShowForm(true);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Delete this entry?")) {
+      setEntries(entries.filter((e) => e.id !== id));
+    }
+  };
+
   const openAdd = () => { setEditData(null); setShowForm(true); };
+
+  const filteredEntries = entries.filter((e) => {
+    const matchDate = filterDate ? e.date === filterDate : true;
+    const matchRole = filterRole ? e.role === filterRole : true;
+    return matchDate && matchRole;
+  });
+
+  const totalCost = entries.reduce((sum, e) => sum + (e.totalCost || 0), 0);
+  const totalHours = entries.reduce((sum, e) => sum + (Number(e.hoursWorked) || 0), 0);
 
   const navItems = [
     { icon: "🏠", label: "Dashboard", key: "dashboard" },
@@ -41,42 +62,27 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
     <div style={{ display: "flex", height: "100vh", fontFamily: "'Inter', sans-serif", backgroundColor: "#f8fafc" }}>
 
       {/* ── SIDEBAR ── */}
-      <div style={{ width: "235px", backgroundColor: "#1E293B", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+      <div style={{ width: "235px", backgroundColor: black, display: "flex", flexDirection: "column", flexShrink: 0 }}>
 
-        {/* Logo + App Name */}
+        {/* Logo */}
         <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", gap: "12px" }}>
-          <img
-            src="/logo.jpeg"
-            alt="BuildTrack"
-            style={{ width: "52px", height: "52px", borderRadius: "50%", objectFit: "cover", border: "2px solid #F97316", flexShrink: 0 }}
-          />
+          <img src="/logo.jpeg" alt="BuildTrack" style={{ width: "52px", height: "52px", borderRadius: "50%", objectFit: "cover", border: "2px solid #F97316", flexShrink: 0 }} />
           <div>
             <div style={{ fontSize: "16px", fontWeight: 800, lineHeight: 1.2 }}>
               <span style={{ color: "#fff" }}>Build</span>
               <span style={{ color: "#F97316" }}>Track</span>
             </div>
-            <div style={{ fontSize: "10px", color: "#6b7280", letterSpacing: "1px", textTransform: "uppercase", marginTop: "2px" }}>
-              Expense Tracker
-            </div>
+            <div style={{ fontSize: "10px", color: "#6b7280", letterSpacing: "1px", textTransform: "uppercase", marginTop: "2px" }}>Expense Tracker</div>
           </div>
         </div>
 
-        {/* Nav Items */}
+        {/* Nav */}
         <div style={{ flex: 1, padding: "12px 10px", display: "flex", flexDirection: "column", gap: "2px" }}>
           {navItems.map((item) => {
             const active = activeNav === item.key;
             return (
-              <div
-                key={item.key}
-                onClick={() => setActiveNav(item.key)}
-                style={{
-                  display: "flex", alignItems: "center", gap: "12px",
-                  padding: "11px 14px", borderRadius: "8px",
-                  backgroundColor: active ? orange : "transparent",
-                  color: active ? "#fff" : "#9ca3af",
-                  fontSize: "13px", fontWeight: active ? 600 : 400,
-                  cursor: "pointer",
-                }}
+              <div key={item.key} onClick={() => setActiveNav(item.key)}
+                style={{ display: "flex", alignItems: "center", gap: "12px", padding: "11px 14px", borderRadius: "8px", backgroundColor: active ? orange : "transparent", color: active ? "#fff" : "#9ca3af", fontSize: "13px", fontWeight: active ? 600 : 400, cursor: "pointer" }}
               >
                 <span style={{ fontSize: "15px" }}>{item.icon}</span>
                 {item.label}
@@ -93,10 +99,10 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* ── MAIN ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
-        {/* Top Bar */}
+        {/* Topbar */}
         <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #e2e8f0", height: "62px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", flexShrink: 0 }}>
           <span style={{ fontSize: "20px", color: "#64748b", cursor: "pointer" }}>☰</span>
           <div style={{ flex: 1, maxWidth: "380px", margin: "0 24px", position: "relative" }}>
@@ -119,7 +125,7 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
           </div>
         </div>
 
-        {/* Page Body */}
+        {/* Body */}
         <div style={{ flex: 1, padding: "28px 32px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px" }}>
 
           {/* Page Header */}
@@ -153,7 +159,18 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
             ))}
           </div>
 
-          {/* Empty State */}
+          {/* Filters — show only when entries exist */}
+          {entries.length > 0 && (
+            <LabourFilters
+              filterDate={filterDate}
+              setFilterDate={setFilterDate}
+              filterRole={filterRole}
+              setFilterRole={setFilterRole}
+              onClear={() => { setFilterDate(""); setFilterRole(""); }}
+            />
+          )}
+
+          {/* Table or Empty State */}
           {entries.length === 0 ? (
             <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "320px" }}>
               <div style={{ fontSize: "52px", marginBottom: "16px" }}>👷</div>
@@ -163,10 +180,18 @@ export default function LabourDashboard({ siteId = "SITE-001", siteName = "Site 
                 + Add First Entry
               </button>
             </div>
-          ) : (
-            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "20px" }}>
-              <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>✅ {entries.length} entries added. Table coming in next step!</p>
+          ) : filteredEntries.length === 0 ? (
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "48px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <div style={{ fontSize: "40px", marginBottom: "12px" }}>🔍</div>
+              <p style={{ margin: "0 0 6px", fontSize: "15px", fontWeight: 700, color: "#111827" }}>No results found</p>
+              <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8" }}>Try clearing the filters.</p>
             </div>
+          ) : (
+            <LabourTable
+              entries={filteredEntries}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           )}
 
         </div>
