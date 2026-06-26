@@ -1,4 +1,4 @@
-import LabourDashboard from "./modules/labour/LabourDashboard";
+import LabourDashboard from "./labour/LabourDashboard";
 
 function App() {
   return <LabourDashboard siteId="SITE-001" siteName="Site Alpha" />;
