@@ -20,7 +20,7 @@ const NAV_ITEMS = [
 
 export default function SiteDashboard() {
   const { siteId } = useParams();
-  const { getSite, logout } = useApp();
+  const { getSite, logout, currentUser } = useApp();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const site = getSite(siteId);
@@ -179,7 +179,11 @@ export default function SiteDashboard() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13, fontWeight: 700, color: '#fff',
             }}>
-              A
+              {(currentUser?.name || 'Admin')[0].toUpperCase()}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <span style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>{currentUser?.name || 'Admin'}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: 10, lineHeight: 1.2 }}>Administrator</span>
             </div>
           </div>
         </header>

@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { HardHat, Plus, MapPin, Calendar, DollarSign, Trash2, LogOut, Building, TrendingUp, X } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/format';
 import logo from '../assets/logo-on-navy.png';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 
 function CreateSiteModal({ onClose, onCreate }) {
   const [form, setForm] = useState({ name: '', location: '', budget: '' });
@@ -11,7 +12,9 @@ function CreateSiteModal({ onClose, onCreate }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name || !form.budget) return;
-    onCreate({ ...form, budget: Number(form.budget) });
+    const b = Number(form.budget);
+    if (b < 1 || b > 1000000000) return;
+    onCreate({ ...form, budget: b });
     onClose();
   };
 
@@ -27,17 +30,17 @@ function CreateSiteModal({ onClose, onCreate }) {
             <div className="form-group">
               <label className="form-label">Site Name *</label>
               <input type="text" className="form-input" placeholder="e.g. Site D" value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                onChange={e => setForm(f => ({ ...f, name: e.target.value.replace(/[0-9]/g, '') }))} required />
             </div>
             <div className="form-group">
               <label className="form-label">Location</label>
               <input type="text" className="form-input" placeholder="e.g. West Corridor" value={form.location}
-                onChange={e => setForm(f => ({ ...f, location: e.target.value }))} />
+                onChange={e => setForm(f => ({ ...f, location: e.target.value.replace(/[0-9]/g, '') }))} />
             </div>
             <div className="form-group">
               <label className="form-label">Total Budget (₹) *</label>
               <input type="number" className="form-input" placeholder="500000" value={form.budget}
-                onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} required min="0" />
+                onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} required min="1" max="1000000000" />
             </div>
           </div>
           <div className="modal-footer">
@@ -53,9 +56,10 @@ function CreateSiteModal({ onClose, onCreate }) {
 }
 
 export default function SitesPage() {
-  const { sites, createSite, deleteSite, logout, getTotalExpenses, getTotalLaborCost } = useApp();
+  const { sites, createSite, deleteSite, logout, getTotalExpenses, getTotalLaborCost, currentUser } = useApp();
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   return (
     <div style={{
@@ -76,10 +80,27 @@ export default function SitesPage() {
             style={{ height: 34, width: 'auto', display: 'block', objectFit: 'contain' }}
           />
         </div>
-        <button className="btn btn-secondary btn-sm" onClick={logout}
-          style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
-          <LogOut size={14} /> Logout
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: '50%',
+              background: '#fff',
+              border: '2px solid var(--orange)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, fontWeight: 700, color: 'var(--navy)',
+            }}>
+              {(currentUser?.name || 'Admin')[0].toUpperCase()}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <span style={{ color: '#fff', fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>{currentUser?.name || 'Admin'}</span>
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, lineHeight: 1.2 }}>Administrator</span>
+            </div>
+          </div>
+          <button className="btn btn-secondary btn-sm" onClick={logout}
+            style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
+            <LogOut size={14} /> Logout
+          </button>
+        </div>
       </header>
 
       <main style={{ padding: '40px 32px', maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -186,7 +207,7 @@ export default function SitesPage() {
                   </div>
                   <button
                     className="btn btn-ghost btn-icon btn-sm"
-                    onClick={e => { e.stopPropagation(); deleteSite(site.id); }}
+                    onClick={e => { e.stopPropagation(); setDeleteTarget(site); }}
                     style={{ color: 'var(--red)', opacity: 0.6 }}
                     onMouseEnter={e => e.currentTarget.style.opacity = '1'}
                     onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
@@ -245,6 +266,18 @@ export default function SitesPage() {
       </main>
 
       {showCreate && <CreateSiteModal onClose={() => setShowCreate(false)} onCreate={createSite} />}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title="Delete Site?"
+          message={`"${deleteTarget.name}" and all its workers, expenses, and attendance records will be permanently removed.`}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            deleteSite(deleteTarget.id);
+            setDeleteTarget(null);
+          }}
+        />
+      )}
     </div>
   );
 }
