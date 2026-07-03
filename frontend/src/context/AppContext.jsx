@@ -72,7 +72,7 @@ export function AppProvider({ children }) {
   // Sites
  const createSite = async (data) => {
   try {
-    await axios.post("http://127.0.0.1:5000/site", {
+    await axios.post("https://team-7-backend.onrender.com/site", {
       site_name: data.name,
       location: data.location,
       budget: data.budget,
@@ -115,7 +115,7 @@ const getSiteExpenses = (siteId) => expenses[siteId] || [];
   const addExpense = async (siteId, data) => {
   try {
     // Save to Flask Backend
-    await axios.post("http://127.0.0.1:5000/expense", {
+    await axios.post("https://team-7-backend.onrender.com/expense", {
       site_id: siteId,
       category: data.category,
       amount: data.amount,
@@ -158,7 +158,7 @@ const getSiteExpenses = (siteId) => expenses[siteId] || [];
 
  const addWorker = async (siteId, data) => {
   try {
-    await axios.post("http://127.0.0.1:5000/labour", {
+    await axios.post("https://team-7-backend.onrender.com/labour", {
       worker_name: data.name,
       daily_wage: data.dailyWage,
       days_worked: data.daysWorked || 1,
