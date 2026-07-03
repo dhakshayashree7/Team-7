@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 import sqlite3
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)
 @app.route("/")
 def home():
     return "Construction Expense Tracker Backend Running"
@@ -165,4 +165,4 @@ def budget_report(site_id):
         "remaining_budget": remaining
     })
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
