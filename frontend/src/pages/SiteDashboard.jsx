@@ -20,7 +20,7 @@ const NAV_ITEMS = [
 
 export default function SiteDashboard() {
   const { siteId } = useParams();
-  const { getSite, logout, currentUser } = useApp();
+  const { getSite, logout } = useApp();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const site = getSite(siteId);
@@ -28,20 +28,9 @@ export default function SiteDashboard() {
   if (!site) return <Navigate to="/" replace />;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--surface)' }}>
+    <div className="dashboard-container">
       {/* Sidebar */}
-      <aside className="blueprint-grid" style={{
-        width: 'var(--sidebar-width)',
-        background: 'var(--gradient-navy)',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'fixed',
-        top: 0, left: 0, bottom: 0,
-        zIndex: 100,
-        transition: 'transform 0.2s',
-        transform: mobileOpen ? 'translateX(0)' : undefined,
-        boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
-      }}>
+      <aside className={`blueprint-grid dashboard-sidebar ${mobileOpen ? 'sidebar-open' : ''}`}>
         {/* Logo */}
         <div style={{
           padding: '0 20px',
@@ -147,31 +136,19 @@ export default function SiteDashboard() {
       )}
 
       {/* Main content */}
-      <div style={{ flex: 1, marginLeft: 'var(--sidebar-width)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="dashboard-content">
         {/* Top bar */}
-        <header style={{
-          height: 'var(--header-height)',
-          background: 'var(--white)',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 28px',
-          position: 'sticky',
-          top: 0,
-          zIndex: 50,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-        }}>
-          <button className="btn btn-ghost btn-icon" onClick={() => setMobileOpen(true)} style={{ display: 'none' }}>
+        <header className="dashboard-header">
+          <button className="btn btn-ghost btn-icon menu-toggle-btn" onClick={() => setMobileOpen(true)}>
             <Menu size={20} />
           </button>
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600 }}>{site.name} Dashboard</h2>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{site.name} Dashboard</h2>
             <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               Budget: <strong style={{ color: 'var(--text-primary)' }}>₹{site.budget.toLocaleString('en-IN')}</strong>
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             <div style={{
               width: 34, height: 34, borderRadius: '50%',
               background: 'var(--gradient-navy)',
@@ -179,17 +156,13 @@ export default function SiteDashboard() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13, fontWeight: 700, color: '#fff',
             }}>
-              {(currentUser?.name || 'Admin')[0].toUpperCase()}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>{currentUser?.name || 'Admin'}</span>
-              <span style={{ color: 'var(--text-muted)', fontSize: 10, lineHeight: 1.2 }}>Administrator</span>
+              A
             </div>
           </div>
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, padding: '28px', overflowY: 'auto' }}>
+        <main className="dashboard-main">
           <Routes>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<OverviewModule siteId={siteId} site={site} />} />
@@ -199,6 +172,85 @@ export default function SiteDashboard() {
           </Routes>
         </main>
       </div>
+
+      <style>{`
+        .dashboard-container {
+          display: flex;
+          min-height: 100vh;
+          background: var(--surface);
+        }
+        .dashboard-sidebar {
+          width: var(--sidebar-width);
+          background: var(--gradient-navy);
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          top: 0; left: 0; bottom: 0;
+          z-index: 100;
+          transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+          transform: translateX(0);
+        }
+        .dashboard-content {
+          flex: 1;
+          margin-left: var(--sidebar-width);
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+        }
+        .dashboard-header {
+          height: var(--header-height);
+          background: var(--white);
+          border-bottom: 1px solid var(--border);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 28px;
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .menu-toggle-btn {
+          display: none;
+        }
+        .dashboard-main {
+          flex: 1;
+          padding: 28px;
+          overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+          .dashboard-sidebar {
+            transform: translateX(-100%);
+          }
+          .dashboard-sidebar.sidebar-open {
+            transform: translateX(0);
+          }
+          .dashboard-content {
+            margin-left: 0;
+          }
+          .dashboard-header {
+            padding: 0 16px;
+          }
+          .menu-toggle-btn {
+            display: flex !important;
+            margin-right: 12px;
+            padding: 8px;
+          }
+          .dashboard-main {
+            padding: 16px;
+          }
+        }
+        @media (max-width: 480px) {
+          .dashboard-header h2 {
+            font-size: 14px !important;
+          }
+          .dashboard-header p {
+            font-size: 11px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
