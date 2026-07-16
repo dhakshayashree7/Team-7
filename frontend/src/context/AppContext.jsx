@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import axios from "axios";
 
 const AppContext = createContext(null);
 
@@ -69,11 +70,32 @@ export function AppProvider({ children }) {
   };
 
   // Sites
-  const createSite = (data) => {
-    const site = { ...data, id: uuidv4(), createdAt: new Date().toISOString().split('T')[0], color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0') };
-    setSites(prev => [...prev, site]);
+ const createSite = async (data) => {
+  try {
+    await axios.post("https://team-7-backend.onrender.com/site", {
+      site_name: data.name,
+      location: data.location,
+      budget: data.budget,
+    });
+
+    const site = {
+      ...data,
+      id: uuidv4(),
+      createdAt: new Date().toISOString().split("T")[0],
+      color:
+        "#" +
+        Math.floor(Math.random() * 16777215)
+          .toString(16)
+          .padStart(6, "0"),
+    };
+
+    setSites((prev) => [...prev, site]);
+
     return site;
-  };
+  } catch (error) {
+    console.error("Error creating site:", error);
+  }
+};
 
   const getSite = (id) => sites.find(s => s.id === id);
 
@@ -86,13 +108,37 @@ export function AppProvider({ children }) {
   };
 
   // Expenses
-  const getSiteExpenses = (siteId) => expenses[siteId] || [];
+ 
+const getSiteExpenses = (siteId) => expenses[siteId] || [];
 
-  const addExpense = (siteId, data) => {
-    const exp = { ...data, id: uuidv4(), createdAt: new Date().toISOString() };
-    setExpenses(prev => ({ ...prev, [siteId]: [...(prev[siteId] || []), exp] }));
-  };
 
+  const addExpense = async (siteId, data) => {
+  try {
+    // Save to Flask Backend
+    await axios.post("https://team-7-backend.onrender.com/expense", {
+      site_id: siteId,
+      category: data.category,
+      amount: data.amount,
+      expense_date: data.date,
+    });
+
+    // Also update UI immediately
+    const exp = {
+      ...data,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+    };
+
+    setExpenses((prev) => ({
+      ...prev,
+      [siteId]: [...(prev[siteId] || []), exp],
+    }));
+
+    console.log("Expense saved successfully!");
+  } catch (error) {
+    console.error("Error saving expense:", error);
+  }
+};
   const updateExpense = (siteId, id, data) => {
     setExpenses(prev => ({
       ...prev,
@@ -110,10 +156,30 @@ export function AppProvider({ children }) {
   // Workers
   const getSiteWorkers = (siteId) => workers[siteId] || [];
 
-  const addWorker = (siteId, data) => {
-    const worker = { ...data, id: uuidv4(), createdAt: new Date().toISOString() };
-    setWorkers(prev => ({ ...prev, [siteId]: [...(prev[siteId] || []), worker] }));
-  };
+ const addWorker = async (siteId, data) => {
+  try {
+    await axios.post("https://team-7-backend.onrender.com/labour", {
+      worker_name: data.name,
+      daily_wage: data.dailyWage,
+      days_worked: data.daysWorked || 1,
+    });
+
+    const worker = {
+      ...data,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+    };
+
+    setWorkers((prev) => ({
+      ...prev,
+      [siteId]: [...(prev[siteId] || []), worker],
+    }));
+
+    console.log("Worker saved successfully!");
+  } catch (error) {
+    console.error("Error saving worker:", error);
+  }
+};
 
   const updateWorker = (siteId, id, data) => {
     setWorkers(prev => ({
