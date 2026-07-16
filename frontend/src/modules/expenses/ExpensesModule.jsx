@@ -51,12 +51,12 @@ export default function ExpensesModule({ siteId, site }) {
 
   return (
     <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div className="page-header-res">
         <div>
           <h2>Expense Entry</h2>
           <p>Track materials, transport, and miscellaneous costs</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="page-header-res-actions">
           <button className="btn btn-ghost" onClick={handleExportCSV} disabled={filtered.length === 0}>
             <FileDown size={16} /> Export CSV
           </button>
@@ -70,10 +70,10 @@ export default function ExpensesModule({ siteId, site }) {
       </div>
 
       <div className="grid-3" style={{ marginBottom: 20, alignItems: 'stretch' }}>
-        <div className="card" style={{ gridColumn: 'span 2' }}>
-          <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+        <div className="card col-span-2-res">
+          <div className="card-header-res">
             <h4 style={{ fontSize: 14, fontWeight: 600 }}>All Expenses</h4>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="card-header-filters">
               <div style={{ position: 'relative' }}>
                 <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
@@ -185,6 +185,36 @@ export default function ExpensesModule({ siteId, site }) {
           onConfirm={() => { deleteExpense(siteId, deleteTarget.id); setDeleteTarget(null); }}
         />
       )}
+
+      <style>{`
+        .card-header-res {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+          gap: 12px;
+        }
+        .card-header-filters {
+          display: flex;
+          gap: 8px;
+        }
+        @media (max-width: 640px) {
+          .card-header-res {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .card-header-filters {
+            width: 100%;
+            flex-direction: column;
+            gap: 8px;
+          }
+          .card-header-filters > div,
+          .card-header-filters input,
+          .card-header-filters select {
+            width: 100% !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

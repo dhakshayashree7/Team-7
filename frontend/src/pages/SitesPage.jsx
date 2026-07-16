@@ -4,7 +4,6 @@ import { useApp } from '../context/AppContext';
 import { HardHat, Plus, MapPin, Calendar, DollarSign, Trash2, LogOut, Building, TrendingUp, X } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/format';
 import logo from '../assets/logo-on-navy.png';
-import ConfirmDialog from '../components/ui/ConfirmDialog';
 
 function CreateSiteModal({ onClose, onCreate }) {
   const [form, setForm] = useState({ name: '', location: '', budget: '' });
@@ -12,9 +11,7 @@ function CreateSiteModal({ onClose, onCreate }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name || !form.budget) return;
-    const b = Number(form.budget);
-    if (b < 1 || b > 1000000000) return;
-    onCreate({ ...form, budget: b });
+    onCreate({ ...form, budget: Number(form.budget) });
     onClose();
   };
 
@@ -30,17 +27,17 @@ function CreateSiteModal({ onClose, onCreate }) {
             <div className="form-group">
               <label className="form-label">Site Name *</label>
               <input type="text" className="form-input" placeholder="e.g. Site D" value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value.replace(/[0-9]/g, '') }))} required />
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
             </div>
             <div className="form-group">
               <label className="form-label">Location</label>
               <input type="text" className="form-input" placeholder="e.g. West Corridor" value={form.location}
-                onChange={e => setForm(f => ({ ...f, location: e.target.value.replace(/[0-9]/g, '') }))} />
+                onChange={e => setForm(f => ({ ...f, location: e.target.value }))} />
             </div>
             <div className="form-group">
               <label className="form-label">Total Budget (₹) *</label>
               <input type="number" className="form-input" placeholder="500000" value={form.budget}
-                onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} required min="1" max="1000000000" />
+                onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} required min="0" />
             </div>
           </div>
           <div className="modal-footer">
@@ -56,10 +53,9 @@ function CreateSiteModal({ onClose, onCreate }) {
 }
 
 export default function SitesPage() {
-  const { sites, createSite, deleteSite, logout, getTotalExpenses, getTotalLaborCost, currentUser } = useApp();
+  const { sites, createSite, deleteSite, logout, getTotalExpenses, getTotalLaborCost } = useApp();
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
 
   return (
     <div style={{
@@ -68,11 +64,7 @@ export default function SitesPage() {
       position: 'relative',
     }}>
       {/* Header — navy navbar */}
-      <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 32px', height: 64,
-        background: 'var(--gradient-navy)',
-      }}>
+      <header className="sites-header">
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img
             src={logo}
@@ -80,32 +72,15 @@ export default function SitesPage() {
             style={{ height: 34, width: 'auto', display: 'block', objectFit: 'contain' }}
           />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: '50%',
-              background: '#fff',
-              border: '2px solid var(--orange)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 700, color: 'var(--navy)',
-            }}>
-              {(currentUser?.name || 'Admin')[0].toUpperCase()}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span style={{ color: '#fff', fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>{currentUser?.name || 'Admin'}</span>
-              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, lineHeight: 1.2 }}>Administrator</span>
-            </div>
-          </div>
-          <button className="btn btn-secondary btn-sm" onClick={logout}
-            style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
-            <LogOut size={14} /> Logout
-          </button>
-        </div>
+        <button className="btn btn-secondary btn-sm" onClick={logout}
+          style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <LogOut size={14} /> Logout
+        </button>
       </header>
 
-      <main style={{ padding: '40px 32px', maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      <main className="sites-main">
         {/* Title */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 32 }}>
+        <div className="sites-title-bar">
           <div>
             <h1 style={{ color: 'var(--text-primary)', fontSize: 28, marginBottom: 6 }}>Construction Sites</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
@@ -118,7 +93,7 @@ export default function SitesPage() {
         </div>
 
         {/* Stats summary */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
+        <div className="grid-3" style={{ marginBottom: 32, gap: 16 }}>
           {[
             { label: 'Total Sites', value: sites.length, icon: Building, color: 'var(--orange)' },
             {
@@ -153,7 +128,7 @@ export default function SitesPage() {
         </div>
 
         {/* Sites grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
           {sites.map(site => {
             const totalExp = getTotalExpenses(site.id) + getTotalLaborCost(site.id);
             const remaining = site.budget - totalExp;
@@ -207,7 +182,7 @@ export default function SitesPage() {
                   </div>
                   <button
                     className="btn btn-ghost btn-icon btn-sm"
-                    onClick={e => { e.stopPropagation(); setDeleteTarget(site); }}
+                    onClick={e => { e.stopPropagation(); deleteSite(site.id); }}
                     style={{ color: 'var(--red)', opacity: 0.6 }}
                     onMouseEnter={e => e.currentTarget.style.opacity = '1'}
                     onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
@@ -267,17 +242,48 @@ export default function SitesPage() {
 
       {showCreate && <CreateSiteModal onClose={() => setShowCreate(false)} onCreate={createSite} />}
 
-      {deleteTarget && (
-        <ConfirmDialog
-          title="Delete Site?"
-          message={`"${deleteTarget.name}" and all its workers, expenses, and attendance records will be permanently removed.`}
-          onCancel={() => setDeleteTarget(null)}
-          onConfirm={() => {
-            deleteSite(deleteTarget.id);
-            setDeleteTarget(null);
-          }}
-        />
-      )}
+      <style>{`
+        .sites-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 32px;
+          height: 64px;
+          background: var(--gradient-navy);
+        }
+        .sites-main {
+          padding: 40px 32px;
+          max-width: 1200px;
+          margin: 0 auto;
+          position: relative;
+          z-index: 1;
+        }
+        .sites-title-bar {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          margin-bottom: 32px;
+          gap: 16px;
+        }
+        @media (max-width: 768px) {
+          .sites-header {
+            padding: 0 16px;
+          }
+          .sites-main {
+            padding: 24px 16px;
+          }
+        }
+        @media (max-width: 600px) {
+          .sites-title-bar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .sites-title-bar button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      `}</style>
     </div>
   );
 }

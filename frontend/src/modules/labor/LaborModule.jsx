@@ -69,12 +69,12 @@ export default function LaborModule({ siteId, site }) {
 
   return (
     <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div className="page-header-res">
         <div>
           <h2>Labor Cost Tracking</h2>
           <p>Manage workers, attendance, and auto-calculated wages</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="page-header-res-actions">
           <button className="btn btn-ghost" onClick={handleExportCSV} disabled={workers.length === 0}>
             <FileDown size={16} /> Export CSV
           </button>
