@@ -31,8 +31,8 @@ export default function ExpenseFormModal({ onClose, onSubmit, initial }) {
       <form id="expense-form" onSubmit={handleSubmit} className="modal-body">
         <div className="form-group">
           <label className="form-label">Expense Name *</label>
-          <input type="text" className="form-input" placeholder="e.g. Cement bags"
-            value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value.replace(/[0-9]/g, '') }))} required />
+          <input type="text" className="form-input" placeholder="e.g. Cement bags - 50 units"
+            value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
         </div>
         <div className="grid-2" style={{ gap: 14 }}>
           <div className="form-group">

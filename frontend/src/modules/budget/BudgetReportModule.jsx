@@ -60,12 +60,12 @@ export default function BudgetReportModule({ siteId, site }) {
 
   return (
     <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div className="page-header-res">
         <div>
           <h2>Budget vs Actual Report</h2>
           <p>Compare planned budget against real spending for {site.name}</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="page-header-res-actions">
           <button className="btn btn-ghost" onClick={handleExportCSV}>
             <FileDown size={16} /> Export CSV
           </button>
@@ -76,9 +76,8 @@ export default function BudgetReportModule({ siteId, site }) {
       </div>
 
       {/* Status banner */}
-      <div className="card" style={{
+      <div className="card budget-status-banner" style={{
         marginBottom: 20,
-        display: 'flex', alignItems: 'center', gap: 16,
         background: isOver ? 'var(--red-light)' : 'var(--green-light)',
         border: `1px solid ${isOver ? 'var(--red)' : 'var(--green)'}33`,
       }}>
@@ -112,9 +111,9 @@ export default function BudgetReportModule({ siteId, site }) {
         </div>
 
         {/* Stats */}
-        <div className="card" style={{ gridColumn: 'span 2' }}>
+        <div className="card col-span-2-res">
           <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 18 }}>Financial Summary</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+          <div className="grid-inner-2">
             {[
               { label: 'Planned Budget', value: formatCurrency(site.budget), icon: null },
               { label: 'Actual Spending', value: formatCurrency(totalActual), icon: null },
@@ -193,6 +192,20 @@ export default function BudgetReportModule({ siteId, site }) {
           )}
         </div>
       </div>
+      <style>{`
+        .budget-status-banner {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        @media (max-width: 600px) {
+          .budget-status-banner {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+        }
+      `}</style>
     </div>
   );
 }

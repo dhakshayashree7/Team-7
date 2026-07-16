@@ -14,9 +14,7 @@ export default function WorkerFormModal({ onClose, onSubmit, initial }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name || !form.dailyWage) return;
-    const wage = Number(form.dailyWage);
-    if (wage < 1 || wage > 100000) return;
-    onSubmit({ ...form, dailyWage: wage });
+    onSubmit({ ...form, dailyWage: Number(form.dailyWage) });
     onClose();
   };
 
@@ -33,7 +31,7 @@ export default function WorkerFormModal({ onClose, onSubmit, initial }) {
         <div className="form-group">
           <label className="form-label">Worker Name *</label>
           <input type="text" className="form-input" placeholder="e.g. Ramesh Kumar"
-            value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value.replace(/[0-9]/g, '') }))} required />
+            value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
         </div>
         <div className="grid-2" style={{ gap: 14 }}>
           <div className="form-group">
@@ -45,7 +43,7 @@ export default function WorkerFormModal({ onClose, onSubmit, initial }) {
           </div>
           <div className="form-group">
             <label className="form-label">Daily Wage (₹) *</label>
-            <input type="number" className="form-input" placeholder="500" min="1" max="100000"
+            <input type="number" className="form-input" placeholder="500" min="0"
               value={form.dailyWage} onChange={e => setForm(f => ({ ...f, dailyWage: e.target.value }))} required />
           </div>
         </div>
